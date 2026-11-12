@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Amostra: Adivinhe o Número</title>
+<style>
+:root{--surface-0:#F5F5F3;--surface-1:#FFFFFF;--surface-2:#FFFFFF;--text-primary:#1A1A18;--text-secondary:#5F5E5A;--text-muted:#888780;--text-danger:#A32D2D;--text-success:#3B6D11;--text-accent:#185FA5;--border:rgba(0,0,0,0.15);--border-strong:rgba(0,0,0,0.3);--radius:8px}
+@media (prefers-color-scheme: dark){:root{--surface-0:#1E1E1C;--surface-1:#2A2A28;--surface-2:#2F2F2C;--text-primary:#F1EFE8;--text-secondary:#B4B2A9;--text-muted:#888780;--text-danger:#F09595;--text-success:#97C459;--text-accent:#85B7EB;--border:rgba(255,255,255,0.18);--border-strong:rgba(255,255,255,0.3)}}
+*{box-sizing:border-box}
+body{margin:0;padding:24px 16px;background:var(--surface-0);color:var(--text-primary);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;font-size:16px;line-height:1.6}
+main{max-width:680px;margin:0 auto}
+h1{font-size:22px;font-weight:500;margin:0 0 4px}
+.intro{margin:0 0 20px;color:var(--text-secondary);font-size:14px}
+button{font:inherit;font-size:14px;padding:6px 12px;border-radius:var(--radius);border:0.5px solid var(--border-strong);background:transparent;color:var(--text-primary);cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+button:hover{background:rgba(127,127,127,0.12)}
+button:focus-visible{outline:2px solid var(--text-accent);outline-offset:2px}
+.wrap{display:flex;flex-direction:column;gap:20px}
+.row{display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start}
+.stage{position:relative;width:300px;max-width:100%;height:320px;flex:0 0 300px;border:0.5px solid var(--border);border-radius:12px;background:var(--surface-1);overflow:hidden}
+.title{position:absolute;top:12px;left:0;right:0;text-align:center;font-size:16px;font-weight:500;color:var(--text-primary)}
+.monitor{position:absolute;top:44px;left:12px;font-size:12px;padding:2px 8px;border-radius:6px;background:#F5C4B3;color:#712B13}
+.bubble{position:absolute;top:56px;left:50%;transform:translateX(-50%);max-width:260px;width:max-content;font-size:14px;padding:6px 10px;border-radius:12px;background:var(--surface-2);border:0.5px solid var(--border);color:var(--text-primary);text-align:center;visibility:hidden}
+.sprite{position:absolute;top:110px;left:50%;transform:translateX(-50%);width:64px;height:64px;border-radius:50%;background:#9966FF;color:#FFFFFF;font-size:36px;font-weight:500;display:flex;align-items:center;justify-content:center}
+.ask{position:absolute;left:0;right:0;bottom:0;padding:10px;background:var(--surface-2);border-top:0.5px solid var(--border)}
+.ask p{margin:0 0 6px;font-size:13px;color:var(--text-primary);min-height:18px}
+.ask .line{display:flex;gap:6px}
+.ask input{flex:1;min-width:0;font:inherit;font-size:14px;padding:6px 10px;border-radius:var(--radius);border:0.5px solid var(--border-strong);background:var(--surface-1);color:var(--text-primary)}
+.err{color:var(--text-danger);font-size:13px;margin:4px 0 0;min-height:18px}
+.note{font-size:13px;color:var(--text-secondary);margin:0}
+.note.err{color:var(--text-danger)}
+.note.ok{color:var(--text-success)}
+.script{flex:1;min-width:280px;max-width:380px}
+.blk{font-size:14px;line-height:1.6;padding:6px 10px;border-radius:8px;border:0.5px solid;margin:4px 0}
+.blk.hat{border-radius:18px 18px 6px 6px}
+.blk.cap{border-radius:6px 6px 14px 14px}
+.blk.active{outline:2px solid var(--text-primary);outline-offset:1px}
+.chip{display:inline-block;padding:0 6px;border-radius:6px;border:0.5px solid;font-size:13px;line-height:1.6}
+.amber{background:#FAC775;color:#633806;border-color:#BA7517}
+.coral{background:#F5C4B3;color:#712B13;border-color:#D85A30}
+.blue{background:#B5D4F4;color:#0C447C;border-color:#378ADD}
+.teal{background:#9FE1CB;color:#085041;border-color:#1D9E75}
+.green{background:#C0DD97;color:#27500A;border-color:#639922}
+.purple{background:#CECBF6;color:#3C3489;border-color:#7F77DD}
+.white{background:var(--surface-2);color:var(--text-primary);border-color:var(--border)}
+.pool{display:flex;flex-wrap:wrap;gap:6px;padding:8px;border:0.5px solid var(--border);border-radius:12px;min-height:60px}
+.pool .blk{display:inline-block;margin:0;cursor:pointer}
+.pool .blk:focus-visible{outline:2px solid var(--text-accent);outline-offset:1px}
+.asm{display:flex;flex-direction:column;min-height:120px;border:0.5px dashed var(--border);border-radius:12px;padding:8px}
+.asm:empty::before{content:'Monte o script aqui, na ordem certa.';font-size:13px;color:var(--text-muted)}
+.legend{display:flex;gap:6px;flex-wrap:wrap}
+.toolbar{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+</style>
+</head>
+<body>
+<main>
+<h1>Adivinhe o Número</h1>
+<p class="intro">Amostra visual do script do projeto. Ela ajuda a ver a ideia e acompanhar a execução, mas não substitui o projeto Scratch (adivinhe-o-numero.sb3).</p>
+<div class="wrap">
+  <div class="row">
+    <div class="stage">
+      <div class="title">Adivinhe o Número</div>
+      <div class="monitor" id="mon">alvo: —</div>
+      <div class="bubble" id="bubble" aria-live="polite"></div>
+      <div class="sprite" aria-hidden="true">?</div>
+      <div class="ask">
+        <p id="askText" aria-live="polite">Clique na bandeira verde para começar.</p>
+        <div class="line">
+          <input type="number" id="askInput" aria-label="Seu palpite" />
+          <button id="send">Enviar</button>
+        </div>
+        <p class="err" id="askErr" role="alert"></p>
+      </div>
+    </div>
+    <div class="script" id="script"></div>
+  </div>
+  <div class="toolbar">
+    <button id="flag"><svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 1.5v13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M3.5 2h9l-2.2 3.2 2.2 3.2h-9z" fill="#639922"/></svg>Bandeira verde</button>
+    <span class="note">Blocos com contorno estão rodando agora</span>
+  </div>
+  <div class="pool" id="pool"></div>
+  <div class="asm" id="asm"></div>
+  <div class="toolbar">
+    <span class="note" id="pmsg" aria-live="polite">Clique nas peças na ordem em que o script roda.</span>
+    <button id="shuffle">Embaralhar</button>
+  </div>
+  <div class="legend">
+    <span class="chip amber">Eventos</span>
+    <span class="chip coral">Variáveis</span>
+    <span class="chip blue">Entrada</span>
+    <span class="chip teal">Controle</span>
+    <span class="chip green">Operadores</span>
+    <span class="chip purple">Aparência</span>
+  </div>
+</div>
+</main>
+<script>
+const C = (t, cat) => `<span class="chip ${cat}">${t}</span>`;
+const ROWS = [
+  {ind:0, cat:'amber', hat:true, html:'quando bandeira verde clicada'},
+  {ind:0, cat:'coral', html:`definir ${C('alvo','coral')} como ${C('escolher número aleatório de 1 a 10','green')}`},
+  {ind:0, cat:'coral', html:`ocultar variável ${C('alvo','coral')}`},
+  {ind:0, cat:'blue', html:`perguntar ${C('Estou pensando em um número entre 1 e 10. Qual é o seu palpite?','white')} e esperar`},
+  {ind:0, cat:'teal', html:`repetir até que ${C('resposta','blue')} ${C('=','green')} ${C('alvo','coral')}`},
+  {ind:1, cat:'teal', html:`se ${C('resposta','blue')} ${C('&lt;','green')} ${C('alvo','coral')} então`},
+  {ind:2, cat:'purple', html:`dizer ${C('Muito baixo','white')}`},
+  {ind:1, cat:'teal', html:'senão'},
+  {ind:2, cat:'purple', html:`dizer ${C('Muito alto','white')}`},
+  {ind:1, cat:'teal', html:'esperar 1 segundo'},
+  {ind:1, cat:'blue', html:`perguntar ${C("Qual é o seu palpite?",'white')} e esperar`},
+  {ind:0, cat:'teal', cap:true, html:'fim da repetição'},
+  {ind:0, cat:'purple', html:`dizer ${C('juntar','green')} ${C('Você acertou! A resposta era ','white')} ${C('alvo','coral')}`}
+];
+
+const $ = id => document.getElementById(id);
+function makeRow(r){
+  const d = document.createElement('div');
+  d.className = `blk ${r.cat}${r.hat?' hat':''}${r.cap?' cap':''}`;
+  d.style.marginLeft = (r.ind * 18) + 'px';
+  d.innerHTML = r.html;
+  return d;
+}
+
+const scriptEl = $('script');
+ROWS.forEach(r => scriptEl.appendChild(makeRow(r)));
+
+const mon = $('mon'), bubble = $('bubble'), askText = $('askText'), askInput = $('askInput'), askErr = $('askErr');
+let runId = 0, pending = null, secret = 0;
+
+function setActive(i){ [...scriptEl.children].forEach((el, k) => el.classList.toggle('active', k === i)); }
+function say(t){ bubble.textContent = t || ''; bubble.style.visibility = t ? 'visible' : 'hidden'; }
+function setErr(m){ askErr.textContent = m || ''; }
+function sleep(ms, id){ return new Promise((res, rej) => setTimeout(() => id === runId ? res() : rej(), ms)); }
+function askUser(q){
+  return new Promise(res => { pending = res; askText.textContent = q; askInput.value = ''; setErr(''); askInput.focus(); });
+}
+function submit(){
+  if (!pending){ setErr('Espere a próxima pergunta, ou clique na bandeira verde.'); return; }
+  const raw = askInput.value.trim();
+  if (raw === ''){ setErr('Digite um palpite primeiro.'); return; }
+  if (isNaN(Number(raw))){ setErr('Digite um número.'); return; }
+  const res = pending; pending = null;
+  askText.textContent = ''; setErr('');
+  res(Number(raw));
+}
+$('send').addEventListener('click', submit);
+askInput.addEventListener('keydown', e => { if (e.key === 'Enter') submit(); });
+askInput.addEventListener('input', () => setErr(''));
+
+async function run(){
+  const id = ++runId;
+  pending = null; setActive(null); say(''); setErr('');
+  askText.textContent = '';
+  mon.style.visibility = 'visible'; mon.textContent = 'alvo: —';
+  try {
+    setActive(0); await sleep(500, id);
+    secret = 1 + Math.floor(Math.random() * 10);
+    setActive(1); mon.textContent = 'alvo: ' + secret; await sleep(800, id);
+    setActive(2); mon.style.visibility = 'hidden'; await sleep(500, id);
+    setActive(3);
+    let answer = await askUser('Estou pensando em um número entre 1 e 10. Qual é o seu palpite?');
+    while (answer !== secret){
+      setActive(4); await sleep(400, id);
+      if (answer < secret){
+        setActive(5); await sleep(400, id);
+        setActive(6); say('Muito baixo');
+      } else {
+        setActive(5); await sleep(400, id);
+        setActive(7); await sleep(300, id);
+        setActive(8); say('Muito alto');
+      }
+      setActive(9); await sleep(1000, id);
+      setActive(10);
+      answer = await askUser("Qual é o seu palpite?");
+      setActive(11); await sleep(300, id);
+    }
+    setActive(4); await sleep(300, id);
+    setActive(12); say('Você acertou! A resposta era ' + secret);
+    setActive(null);
+  } catch (e) { /* execução cancelada por nova bandeira verde */ }
+}
+$('flag').addEventListener('click', run);
+
+const pool = $('pool'), asm = $('asm'), pmsg = $('pmsg');
+let nextIdx = 0;
+const ORDER = ROWS.map((_, i) => i);
+function shuffledOrder(){
+  const a = ORDER.slice();
+  do {
+    for (let i = a.length - 1; i > 0; i--){ const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  } while (a.every((v, i) => v === i));
+  return a;
+}
+function puzzleMsg(t, cls){ pmsg.textContent = t; pmsg.className = 'note ' + (cls || ''); }
+function pick(p){
+  const i = Number(p.dataset.i);
+  if (i !== nextIdx){
+    puzzleMsg('Essa peça ainda não vem agora. Pense no que acontece antes dela.', 'err');
+    return;
+  }
+  asm.appendChild(makeRow(ROWS[i]));
+  p.remove();
+  nextIdx++;
+  puzzleMsg('');
+  if (nextIdx === ROWS.length) puzzleMsg('Script montado na ordem certa. Veja ele rodando acima.', 'ok');
+}
+function resetPuzzle(){
+  pool.innerHTML = ''; asm.innerHTML = ''; nextIdx = 0;
+  puzzleMsg('Clique nas peças na ordem em que o script roda.');
+  shuffledOrder().forEach(i => {
+    const r = ROWS[i];
+    const p = document.createElement('div');
+    p.className = `blk ${r.cat}${r.hat?' hat':''}${r.cap?' cap':''}`;
+    p.innerHTML = r.html;
+    p.dataset.i = i;
+    p.tabIndex = 0;
+    p.setAttribute('role', 'button');
+    p.addEventListener('click', () => pick(p));
+    p.addEventListener('keydown', e => { if (e.key === 'Enter') pick(p); });
+    pool.appendChild(p);
+  });
+}
+$('shuffle').addEventListener('click', resetPuzzle);
+resetPuzzle();
+</script>
+</body>
+</html>
